@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+#
+# Create Ubuntu-based Foam-Extend image
+#
+# Build
+#   apptainer build fe.sif foam-extend.def
+#
+# Note
+#   apptainer version 1.3.1
+#
+# ---------------------------------------------------------------------------
+Bootstrap: localimage
+From: containers/basic/{{ BASE_CONTAINER }}.sif
+
+%arguments
+    OS_DISTRO=ubuntu
+    OS_VERSION=22.04
+    MPI_IMPLEMENTATION=openmpi
+    MPI_VERSION=4.1.5
+    FRAMEWORK_VERSION=5.0
+    FOAM=foam-extend
+    
+
+%post -c /bin/bash
+    export DEBIAN_FRONTEND=noninteractive 
+    apt-get update
+    apt-get -y install --no-install-recommends \
+        binutils-dev cmake flex zlib1g-dev libncurses-dev bison libbison-dev libfl-dev \
+        python3 libpython3-dev libxt-dev rpm mercurial apt-utils\
+        patch libmetis-dev libscotch-dev libparmetis-dev vim 
+    mkdir -p /opt/foam
+    git clone --single-branch --branch {{ FRAMEWORK_GIT_REF }} --depth 1 \
+        git://git.code.sf.net/p/foam-extend/foam-extend-{{ FRAMEWORK_VERSION }} \
+        /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}
+    sed -i 's|^foamInstall.*|foamInstall=/opt/foam|' /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}/etc/bashrc
+    
+	ALIASES_FILE="/opt/foam/foam-extend-{{ FRAMEWORK_VERSION }}/etc/aliases.sh"
+	cat "$ALIASES_FILE"
+	sed -i '/wm64=/d' "$ALIASES_FILE"
+	sed -i '/wm32=/d' "$ALIASES_FILE"
+	sed -i '/wmSP=/d' "$ALIASES_FILE"
+	sed -i '/wmDP=/d' "$ALIASES_FILE"
+	
+	nProcs=$(nproc)
+    /bin/bash -c "cd /opt/foam/foam-extend-{{ FRAMEWORK_VERSION }} && source etc/bashrc && ./Allwmake.firstInstall -j $nProcs"
+    rm -rf /opt/foam/foam-extend-{{ FRAMEWORK_VERSION }}/tutorials/*
+	
+    
+
+%environment 
+	/bin/bash -c "source /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}/etc/bashrc"	
+
+
+%runscript 
+	/bin/bash -c "source /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}/etc/bashrc"	
+	/bin/bash  "$@"
+
+%labels
+    Description {{OS_DISTRO}}-{{OS_VERSION}} Foam-Extend-{{FRAMEWORK_VERSION}} image with OpenMPI-{{MPI_VERSION}}
+    

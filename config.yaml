@@ -1,0 +1,29 @@
+# containers section defines what containers to build
+containers:
+  basic:
+    foam-extend-5:
+      os:
+        distro: ubuntu
+        version: 22.04
+      mpi:
+        implementation: openmpi
+        version: 4.1.5
+      framework:
+        definition: foam-extend-5
+        version: 5.0
+        git_ref: master # optional (default: default)
+  projects:
+    # you get test-master.sif and test-dev.sif from the following entry
+    solver:
+      base_container: foam-extend-5 # what base container to build the project against (from containers.basic above)
+      definition: defs/solver.def # path to container definition file (relative to CWD)
+      build_args: # case-insensitive, optional build arguments for apptainer
+        branch:
+          - master  # will be passed as `--build-arg BRANCH=master` to `apptainer build`
+
+
+pull:
+  try_to_pull: false # Do we try to pull from registry?
+  protocol: "oras" # docker, or library as Pull protocol
+  scope: "ghcr.io/foamscience" # so oras://ghcr.io/foamscience/<container-name>:latest is used
+

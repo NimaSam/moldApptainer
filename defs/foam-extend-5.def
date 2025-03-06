@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------------------
+#
+# Create Ubuntu-based Foam-Extend image
+#
+# Build
+#   apptainer build fe.sif foam-extend.def
+#
+# Note
+#   apptainer version 1.3.1
+#
+# ---------------------------------------------------------------------------
+Bootstrap: localimage
+From: containers/basic/{{ BASE_CONTAINER }}.sif
+
+%arguments
+    OS_DISTRO=ubuntu
+    OS_VERSION=22.04
+    MPI_IMPLEMENTATION=openmpi
+    MPI_VERSION=4.1.5
+    FRAMEWORK_VERSION=5.0
+    FOAM=foam-extend
+    
+
+%post -c /bin/bash
+    export DEBIAN_FRONTEND=noninteractive 
+    apt-get update
+    apt-get -y install --no-install-recommends \
+        binutils-dev cmake flex zlib1g-dev libncurses-dev bison libbison-dev libfl-dev \
+        python3 libpython3-dev libxt-dev rpm mercurial apt-utils\
+        patch libmetis-dev libscotch-dev libparmetis-dev vim wget
+    
+    
+    wget -O foam-extend-5.0.deb "https://login.yoursecurecloud.de/f/b2a4f0c830d04c4e983e/?dl=1"
+    dpkg -i foam-extend-5.0.deb
+    apt --fix-broken install
+    rm -rf foam-extend-5.0.deb
+	
+    
+
+%environment 
+	/bin/bash -c "source /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}/etc/bashrc"	
+
+
+%runscript 
+    # Source the OpenFOAM environment
+    /bin/bash -c "source /opt/foam/{{ FOAM }}-{{ FRAMEWORK_VERSION }}/etc/bashrc && exec \"$@\""
+
+
+%labels
+    Description {{OS_DISTRO}}-{{OS_VERSION}} Foam-Extend-{{FRAMEWORK_VERSION}} image with OpenMPI-{{MPI_VERSION}}
+    
