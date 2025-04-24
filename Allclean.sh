@@ -1,3 +1,3 @@
 rm -rf containers
-rm -rf tmp
+rm -rf myTmp
 rm -rf ../solver
