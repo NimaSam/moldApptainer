@@ -21,7 +21,7 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     FRAMEWORK_VERSION=5.0
 
 %files 
-    ../../solver /opt/blockUCoupledIMFoam
+    ../solver /opt/solver
 
 
 %post -c /bin/bash
@@ -36,10 +36,10 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     sed -i '/wmDP=/d' \"\$ALIASES_FILE\" && \
     export FOAM_USER_APPBIN=\$FOAM_APPBIN && \
     export FOAM_USER_LIBBIN=\$FOAM_LIBBIN && \
-    cp /opt/blockUCoupledIMFoam/thirdParty/solids4foam/optionalFixes/foam-extend-5/processorFvPatchField.C /opt/foam/foam-extend-5.0/src/finiteVolume/fields/fvPatchFields/constraint/processor/processorFvPatchField.C && cd /opt/foam/foam-extend-5.0/src/finiteVolume && wmake libso && \
-    cd /opt/blockUCoupledIMFoam/thirdParty/solids4foam/ && ./Allwmake && \
-    cd /opt/blockUCoupledIMFoam && ./Allwmake  && \
-    cd /opt/blockUCoupledIMFoam/src/utilities/ && ./Allwmake"
+    cp /opt/solver/thirdParty/solids4foam/optionalFixes/foam-extend-5/processorFvPatchField.C /opt/foam/foam-extend-5.0/src/finiteVolume/fields/fvPatchFields/constraint/processor/processorFvPatchField.C && cd /opt/foam/foam-extend-5.0/src/finiteVolume && wmake libso && \
+    cd /opt/solver/thirdParty/solids4foam/ && ./Allwmake && \
+    cd /opt/solver && ./Allwmake  && \
+    cd /opt/solver/src/utilities/ && ./Allwmake"
 
        
 

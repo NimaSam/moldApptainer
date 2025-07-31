@@ -1,3 +1,3 @@
 rm -rf containers
-rm -rf myTmp
-rm -rf ../solver
+rm -rf tmp
+rm	*.log
