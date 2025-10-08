@@ -18,18 +18,20 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     OS_VERSION=24.04
     MPI_IMPLEMENTATION=openmpi
     MPI_VERSION=4.1.5
-    FRAMEWORK_VERSION=2312
+    FRAMEWORK_VERSION=2412
 
 %files 
     ../solver /opt/solver
-    ../solids4Foam /opt/solids4Foam
+    ../solids4Foam /opt/solver/thirdParty/solids4Foam
+    ../multiRegionFoam  /opt/solver/thirdParty/multiRegionFoam
   
 
 
 %post -c /bin/bash
 
 	apt-get install -y --no-install-recommends \
-		wget curl 
+		wget curl
+		
     
 
     
@@ -40,13 +42,32 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     export FOAM_USER_LIBBIN=$FOAM_LIBBIN
 
     # Build custom solver for mold injection
-    cd /opt/solver
-    ./Allwmake -s -j
+    
+    # Go to multiRegionFoam directory
+    cd /opt/solver/thirdParty/multiRegionFoam
+
+    # Fix filesToReplace
+    cp -r filesToReplace/IOReferencer /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM/db/IOobjects/
+    wmakeLnInclude -f /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM
+
+    cp filesToReplace/GeometricField.H /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM/fields/GeometricFields/GeometricField/
+    wmake libso /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM
+
+    # Build multiRegionFoam
+    ./Allwmake
+
     
     # Build custom solver for solids4Foam (warpage)
-    cd /opt/solids4Foam
+    cd /opt/solver/thirdParty/solids4Foam
     export S4F_NO_FILE_FIXES=1
     ./Allwmake -j
+    
+    # Build IMFoam solver
+    ssh -o StrictHostKeyChecking=no git@bitbucket.org
+    cd /opt/solver 
+    ./Allwmake -j -s
+    wmake applications/solvers/IMFluid/
+    
    
     
        

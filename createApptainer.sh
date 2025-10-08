@@ -8,12 +8,13 @@ VENV_DIR="$TMP_DIR/venv"
 PACKAGING_REPO="https://github.com/FoamScience/openfoam-apptainer-packaging.git"
 SOLVER_REPO="git@bitbucket.org:hmarschall/pucoupledinterdymfoam.git"
 SOLIDS_REPO="git@bitbucket.org:hmarschall/solids4foamlib.git"
+MULTIREGION_REPO="git@bitbucket.org:hmarschall/multiregionfoam.git"
 # ------------------------
 
 # -------- FUNCTIONS --------
 
 print_usage() {
-  echo "Usage: $0 [OF2312 | foam-extend]"
+  echo "Usage: $0 [OF2412 | OF2312 | foam-extend]"
   exit 1
 }
 
@@ -43,7 +44,25 @@ build_OF2312() {
 
   rm -rf "$TMP_DIR/solver/thirdParty" "$TMP_DIR/solver/run"
   rm -rf "$TMP_DIR/solids4Foam/tutorials"
-  cp -r config-openfoam-2312.yaml config.yaml 
+  cp -r config-openfoam-2312.yaml config.yaml
+  cp -r defs/com-openfoam-2312.def defs/com-openfoam.def
+
+  build_container defs/com-openfoam.def
+}
+
+
+build_OF2412() {
+  echo "[INFO] Building for OpenFOAM 2412..."
+
+  git clone --branch feature-esi --single-branch "$SOLVER_REPO" "$TMP_DIR/solver"
+  git clone --branch feature-moldInjection --single-branch "$SOLIDS_REPO" "$TMP_DIR/solids4Foam"
+  git clone --branch port/of2412 --single-branch "$MULTIREGION_REPO" "$TMP_DIR/multiRegionFoam"
+  
+
+  rm -rf "$TMP_DIR/solver/run"
+  rm -rf "$TMP_DIR/solids4Foam/tutorials"
+  cp -r config-openfoam-2412.yaml config.yaml
+  cp -r defs/com-openfoam-2412.def defs/com-openfoam.def 
 
   build_container defs/com-openfoam.def
 }
@@ -64,8 +83,12 @@ fi
 
 VERSION="$1"
 setup_common
+source "$VENV_DIR/bin/activate"
 
 case "$VERSION" in
+  OF2412)
+    build_OF2412
+    ;;
   OF2312)
     build_OF2312
     ;;

@@ -17,15 +17,15 @@ From: containers/basic/{{ BASE_CONTAINER }}.sif
     OS_VERSION=24.04
     MPI_IMPLEMENTATION=openmpi
     MPI_VERSION=4.1.5
-    FRAMEWORK_VERSION=2412
-    FRAMEWORK_GIT_REF=OpenFOAM-v2412
-    THIRDPARTY_GIT_REF=v2412
+    FRAMEWORK_VERSION=2312
+    FRAMEWORK_GIT_REF=OpenFOAM-v2312
+    THIRDPARTY_GIT_REF=v2312
 
 %post -c /bin/bash
     DEBIAN_FRONTEND=noninteractive
     if [[ {{ FRAMEWORK_GIT_REF }} == "default" ]]; then
         curl https://dl.openfoam.com/add-debian-repo.sh | bash
-        apt-get -y install --no-install-recommends openfoam{{ FRAMEWORK_VERSION }} python3
+        apt-get -y install --no-install-recommends openfoam{{ FRAMEWORK_VERSION }}-dev python3
     else
 
 		echo "**************** install requirments ****************"
