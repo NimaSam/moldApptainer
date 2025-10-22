@@ -54,8 +54,7 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     wmake libso /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM
 
     # Build multiRegionFoam
-    ./Allwmake
-
+    ./Allwmake -j 
     
     # Build custom solver for solids4Foam (warpage)
     cd /opt/solver/thirdParty/solids4Foam
@@ -67,9 +66,7 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     cd /opt/solver 
     ./Allwmake -j -s
     wmake applications/solvers/IMFluid/
-    
-   
-    
+        
        
 
 %environment
@@ -77,11 +74,14 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
 
 %runscript
     #!/bin/bash
-    #/bin/bash -c 'source /usr/lib/openfoam/openfoam2312/etc/bashrc && mkdir -p $FOAM_USER_LIBBIN && mkdir -p $FOAM_USER_APPBIN'
+    #/bin/bash -c 'source /usr/lib/openfoam/openfoam2412/etc/bashrc && mkdir -p $FOAM_USER_LIBBIN && mkdir -p $FOAM_USER_APPBIN'
+	source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
+	eval $(foamEtcFile -sh -config petsc -- -force)
+	
     if [ $# -eq 0 ]; then
-        /bin/bash -c "source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc && /bin/bash --login"
+        /bin/bash -c "/bin/bash --login"
     else
-        /bin/bash -c "source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc && $@"
+        /bin/bash -c "$@"
     fi
     
 
