@@ -29,7 +29,7 @@ From:containers/basic/{{ OS_DISTRO }}-{{ OS_VERSION }}-{{MPI_IMPLEMENTATION}}-{{
         apt-get -y install --no-install-recommends openfoam{{ FRAMEWORK_VERSION }} python3
     else
 
-	echo "**************** install requirments ****************"
+		echo "**************** install requirments ****************"
         apt update && apt install -y --no-install-recommends \
 			build-essential \
 			cmake \
@@ -112,8 +112,11 @@ From:containers/basic/{{ OS_DISTRO }}-{{ OS_VERSION }}-{{MPI_IMPLEMENTATION}}-{{
         echo "**************** install openfoam ****************"	
         source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}
-        ./Allwmake -j -s -q -l
+        echo "compile mix presicion ..."
+        (export WM_PRECISION_OPTION=SPDP && ./Allwmake -j -s -q -l)
         
+        #echo "compile double presicion ..."
+        #(export WM_PRECISION_OPTION=DP && ./Allwmake -j -s -q -l)
         
         echo "**************** install petsc ****************"
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/

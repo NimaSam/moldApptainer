@@ -6,6 +6,8 @@ set -e
 TMP_DIR="tmp"
 VENV_DIR="$TMP_DIR/venv"
 PACKAGING_REPO="https://github.com/FoamScience/openfoam-apptainer-packaging.git"
+#PACKAGING_REPO_BRANCH="projects_buildargs"
+PACKAGING_REPO_BRANCH="v1"
 SOLVER_REPO="git@bitbucket.org:hmarschall/pucoupledinterdymfoam.git"
 SOLIDS_REPO="git@bitbucket.org:hmarschall/solids4foamlib.git"
 MULTIREGION_REPO="git@bitbucket.org:hmarschall/multiregionfoam.git"
@@ -23,10 +25,10 @@ setup_common() {
   mkdir -p "$TMP_DIR"
 
   echo "[INFO] Cloning packaging repo..."
-  git clone "$PACKAGING_REPO" "$TMP_DIR/apptainer"
+  git clone --branch "$PACKAGING_REPO_BRANCH" --depth 1 "$PACKAGING_REPO" "$TMP_DIR/apptainer"
 
   echo "[INFO] Setting up Python virtual environment..."
-  python3.10 -m venv "$VENV_DIR"
+  python3.12 -m venv "$VENV_DIR"
   source "$VENV_DIR/bin/activate"
   python -m pip install ansible
 }
@@ -34,6 +36,7 @@ setup_common() {
 build_container() {
   cp "$1" "$TMP_DIR/apptainer/basic/$(basename "$1")"
   ansible-playbook "$TMP_DIR/apptainer/build.yaml" --extra-vars "original_dir=$PWD" --extra-vars "@config.yaml"
+  
 }
 
 build_OF2312() {

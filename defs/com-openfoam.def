@@ -10,7 +10,8 @@
 #
 # ---------------------------------------------------------------------------
 Bootstrap: localimage
-From: containers/basic/{{ BASE_CONTAINER }}.sif
+#From:containers/basic/{{ BASE_CONTAINER }}.sif
+From:containers/basic/{{ OS_DISTRO }}-{{ OS_VERSION }}-{{MPI_IMPLEMENTATION}}-{{ MPI_VERSION }}.sif
 
 %arguments
     OS_DISTRO=ubuntu
@@ -28,8 +29,8 @@ From: containers/basic/{{ BASE_CONTAINER }}.sif
         apt-get -y install --no-install-recommends openfoam{{ FRAMEWORK_VERSION }} python3
     else
 
-		echo "**************** install requirments ****************"
-        apt-get update && apt-get install -y --no-install-recommends \
+	echo "**************** install requirments ****************"
+        apt update && apt install -y --no-install-recommends \
 			build-essential \
 			cmake \
 			autoconf \
@@ -64,7 +65,11 @@ From: containers/basic/{{ BASE_CONTAINER }}.sif
 			libxrender-dev \
 			libxext-dev \
 			libxrandr-dev \
-			libxi-dev
+			libxi-dev \
+			m4 \
+			python3 
+
+		apt update && apt install -y --no-install-recommends libblas-dev liblapack-dev gfortran 
 
             
         echo "**************** download openfoam ****************"
@@ -81,20 +86,44 @@ From: containers/basic/{{ BASE_CONTAINER }}.sif
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty
         git checkout {{ THIRDPARTY_GIT_REF }}
         
+        echo "**************** get petsc *****************************"
+        wget https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-lite-3.21.2.tar.gz
+        tar -xzf petsc-lite-3.21.2.tar.gz
+        
+        
+        echo "**************** get petsc4Foam *****************************"
+        mkdir -p /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/modules/
+        cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/modules/
+        git clone https://develop.openfoam.com/modules/external-solver.git
+        cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/modules/external-solver
+        git checkout {{ THIRDPARTY_GIT_REF }}
+        
+		
+        echo "**************** get scotch *****************************"
         mkdir -p  /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/sources/scotch/
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/sources/scotch/
 		wget https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.0/scotch-v6.1.0.tar.gz -O scotch_6.1.0.tar.gz
 		tar -xzf scotch_6.1.0.tar.gz
 		mv scotch-v6.1.0 scotch_6.1.0
 		#cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty
-    	#./makeSCOTCH
+    	
+    	
         
-        echo "**************** install openfoam ****************"
-        
-		
+        echo "**************** install openfoam ****************"	
         source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}
         ./Allwmake -j -s -q -l
+        
+        
+        echo "**************** install petsc ****************"
+        cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/
+	./makePETSC
+		
+	echo "**************** install petsc4Foam ****************"
+	cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty/modules/external-solver/
+	./Allwmake -prefix=openfoam
+
+        
         
     fi
     jq --arg app openfoam --arg commit {{ FRAMEWORK_GIT_REF }} \
@@ -120,10 +149,12 @@ From: containers/basic/{{ BASE_CONTAINER }}.sif
 
 %runscript
     #!/bin/bash
+    source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
+    eval $(foamEtcFile -sh -config petsc -- -force)
     if [ $# -eq 0 ]; then
-        /bin/bash -c "source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc && /bin/bash --login"
+        /bin/bash -c "/bin/bash --login"
     else
-        /bin/bash -c "source /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc && $@"
+        /bin/bash -c "$@"
     fi
 
 %labels

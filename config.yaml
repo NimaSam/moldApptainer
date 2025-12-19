@@ -12,6 +12,7 @@ containers:
         definition: com-openfoam
         version: 2412
         git_ref: OpenFOAM-v2412 # optional (default: default)
+        base_container:
   projects:
     # you get test-master.sif and test-dev.sif from the following entry
     solver:

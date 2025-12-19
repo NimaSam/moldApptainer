@@ -54,17 +54,17 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     wmake libso /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM
 
     # Build multiRegionFoam
-    ./Allwmake -j 
+    ./Allwmake -j -q -l
     
     # Build custom solver for solids4Foam (warpage)
     cd /opt/solver/thirdParty/solids4Foam
     export S4F_NO_FILE_FIXES=1
-    ./Allwmake -j
+    ./Allwmake -j -q -l
     
     # Build IMFoam solver
     ssh -o StrictHostKeyChecking=no git@bitbucket.org
     cd /opt/solver 
-    ./Allwmake -j -s
+    ./Allwmake -j -s -q -l
     wmake applications/solvers/IMFluid/
         
        
