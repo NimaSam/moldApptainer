@@ -11,6 +11,7 @@ PACKAGING_REPO_BRANCH="v1"
 SOLVER_REPO="git@bitbucket.org:hmarschall/pucoupledinterdymfoam.git"
 SOLIDS_REPO="git@bitbucket.org:hmarschall/solids4foamlib.git"
 MULTIREGION_REPO="git@bitbucket.org:hmarschall/multiregionfoam.git"
+SCHEME_REPO="git@bitbucket.org:hmarschall/blendedgradscheme.git"
 # ------------------------
 
 # -------- FUNCTIONS --------
@@ -60,6 +61,7 @@ build_OF2412() {
   git clone --branch feature-esi --single-branch "$SOLVER_REPO" "$TMP_DIR/solver"
   git clone --branch feature-moldInjection --single-branch "$SOLIDS_REPO" "$TMP_DIR/solids4Foam"
   git clone --branch port/of2412 --single-branch "$MULTIREGION_REPO" "$TMP_DIR/multiRegionFoam"
+  git clone "$SCHEME_REPO" "$TMP_DIR/blendedgradscheme"
   
 
   rm -rf "$TMP_DIR/solver/run"

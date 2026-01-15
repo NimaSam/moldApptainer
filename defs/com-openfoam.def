@@ -21,6 +21,7 @@ From:containers/basic/{{ OS_DISTRO }}-{{ OS_VERSION }}-{{MPI_IMPLEMENTATION}}-{{
     FRAMEWORK_VERSION=2412
     FRAMEWORK_GIT_REF=OpenFOAM-v2412
     THIRDPARTY_GIT_REF=v2412
+    OF_PRECISION=DP
 
 %post -c /bin/bash
     DEBIAN_FRONTEND=noninteractive
@@ -79,9 +80,12 @@ From:containers/basic/{{ OS_DISTRO }}-{{ OS_VERSION }}-{{MPI_IMPLEMENTATION}}-{{
         git checkout {{ FRAMEWORK_GIT_REF }}
         
         # Override the fallback logic in etc/bashrc
-		sed -i 's|projectDir="\$HOME/OpenFOAM/OpenFOAM-\$WM_PROJECT_VERSION"|projectDir="/usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}"|' /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
+	sed -i 's|projectDir="\$HOME/OpenFOAM/OpenFOAM-\$WM_PROJECT_VERSION"|projectDir="/usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}"|' /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
+	
+	sed -i 's|^[[:space:]]*export WM_PRECISION_OPTION=.*|export WM_PRECISION_OPTION={{OF_PRECISION}}|' \
+/usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/etc/bashrc
 
-		echo "**************** download third party ****************"
+	echo "**************** download third party ****************"
         git clone https://develop.openfoam.com/Development/ThirdParty-common.git /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty
         cd /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/ThirdParty
         git checkout {{ THIRDPARTY_GIT_REF }}

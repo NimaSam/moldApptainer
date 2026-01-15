@@ -24,6 +24,7 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     ../solver /opt/solver
     ../solids4Foam /opt/solver/thirdParty/solids4Foam
     ../multiRegionFoam  /opt/solver/thirdParty/multiRegionFoam
+    ../blendedgradscheme  /opt/solver/thirdParty/blendedgradscheme
   
 
 
@@ -54,19 +55,23 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     wmake libso /usr/lib/openfoam/openfoam{{ FRAMEWORK_VERSION }}/src/OpenFOAM
 
     # Build multiRegionFoam
-    ./Allwmake -j -q -l
+    ./Allwmake -j 
     
     # Build custom solver for solids4Foam (warpage)
     cd /opt/solver/thirdParty/solids4Foam
     export S4F_NO_FILE_FIXES=1
-    ./Allwmake -j -q -l
+    ./Allwmake -j 
+    
+    # Build blended schemes
+    cd /opt/solver/thirdParty/blendedgradscheme
+    ./Allwmake -j
     
     # Build IMFoam solver
     ssh -o StrictHostKeyChecking=no git@bitbucket.org
     cd /opt/solver 
-    ./Allwmake -j -s -q -l
+    ./Allwmake -j -s -q -l 
     wmake applications/solvers/IMFluid/
-        
+    
        
 
 %environment
