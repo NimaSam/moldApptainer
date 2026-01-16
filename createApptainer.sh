@@ -17,7 +17,7 @@ SCHEME_REPO="git@bitbucket.org:hmarschall/blendedgradscheme.git"
 # -------- FUNCTIONS --------
 
 print_usage() {
-  echo "Usage: $0 [OF2412 | OF2312 | foam-extend]"
+  echo "Usage: $0 [OF2412 | foam-extend]"
   exit 1
 }
 
@@ -39,21 +39,6 @@ build_container() {
   ansible-playbook "$TMP_DIR/apptainer/build.yaml" --extra-vars "original_dir=$PWD" --extra-vars "@config.yaml"
   
 }
-
-build_OF2312() {
-  echo "[INFO] Building for OpenFOAM 2312..."
-
-  git clone --branch feature-esi --single-branch "$SOLVER_REPO" "$TMP_DIR/solver"
-  git clone --branch feature-moldInjection --single-branch "$SOLIDS_REPO" "$TMP_DIR/solids4Foam"
-
-  rm -rf "$TMP_DIR/solver/thirdParty" "$TMP_DIR/solver/run"
-  rm -rf "$TMP_DIR/solids4Foam/tutorials"
-  cp -r config-openfoam-2312.yaml config.yaml
-  cp -r defs/com-openfoam-2312.def defs/com-openfoam.def
-
-  build_container defs/com-openfoam.def
-}
-
 
 build_OF2412() {
   echo "[INFO] Building for OpenFOAM 2412..."
@@ -93,9 +78,6 @@ source "$VENV_DIR/bin/activate"
 case "$VERSION" in
   OF2412)
     build_OF2412
-    ;;
-  OF2312)
-    build_OF2312
     ;;
   foam-extend)
     build_foam_extend
