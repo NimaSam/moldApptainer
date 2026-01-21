@@ -65,6 +65,16 @@ build_foam_extend() {
   build_container defs/foam-extend-5.def
 }
 
+rename_apptainer() {
+    basePath="./containers/projects"
+    date=$(date +"%Y%m%d")
+
+    if [[ -f "${basePath}/solver-master.sif" ]]; then
+        mv "${basePath}/solver-master.sif" \
+           "${basePath}/app_moldinject_solver_${date}.sif"
+    fi
+}
+
 # -------- MAIN --------
 
 if [[ $# -ne 1 ]]; then
@@ -72,21 +82,23 @@ if [[ $# -ne 1 ]]; then
 fi
 
 VERSION="$1"
-setup_common
-source "$VENV_DIR/bin/activate"
+#setup_common
+#source "$VENV_DIR/bin/activate"
 
 case "$VERSION" in
   OF2412)
-    build_OF2412
+    #build_OF2412
     ;;
   foam-extend)
-    build_foam_extend
+    #build_foam_extend
     ;;
   *)
     echo "[ERROR] Unknown version: $VERSION"
     print_usage
     ;;
 esac
+
+rename_apptainer
 
 echo "[DONE] You can now run:"
 echo "  apptainer shell -C containers/projects/solver-master.sif"
