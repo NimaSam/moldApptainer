@@ -72,6 +72,8 @@ From: {{ CONTAINERS_DIR }}/basic/{{ BASE_CONTAINER }}.sif
     ./Allwmake -j -s -q -l 
     wmake applications/solvers/IMFluid/
     
+    # Remove source files
+    rm -rf /opt/solver/
        
 
 %environment
